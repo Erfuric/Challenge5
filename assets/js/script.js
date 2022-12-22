@@ -1,23 +1,97 @@
-// Wrap all code that interacts with the DOM in a call to jQuery to ensure that
-// the code isn't run until the browser has finished rendering all the elements
-// in the html.
-$(function () {
-  // TODO: Add a listener for click events on the save button. This code should
-  // use the id in the containing time-block as a key to save the user input in
-  // local storage. HINT: What does `this` reference in the click listener
-  // function? How can DOM traversal be used to get the "hour-x" id of the
-  // time-block containing the button that was clicked? How might the id be
-  // useful when saving the description in local storage?
-  //
-  // TODO: Add code to apply the past, present, or future class to each time
-  // block by comparing the id to the current hour. HINTS: How can the id
-  // attribute of each time-block be used to conditionally add or remove the
-  // past, present, and future classes? How can Day.js be used to get the
-  // current hour in 24-hour time?
-  //
-  // TODO: Add code to get any user input that was saved in localStorage and set
-  // the values of the corresponding textarea elements. HINT: How can the id
-  // attribute of each time-block be used to do this?
-  //
-  // TODO: Add code to display the current date in the header of the page.
+// Get the current hour
+const currentHour = dayjs().hour();
+
+// Loop through each time block
+$('.time-block').each(function() {
+  // Get the hour from the time block's id
+  const hour = $(this).attr('id').replace('hour-', '');
+
+  // Remove the past, present, and future classes
+  $(this).removeClass('past present future');
+
+  // If the hour is less than the current hour, add the past class
+  if (hour < currentHour) {
+    $(this).addClass('past');
+  }
+  // If the hour is the same as the current hour, add the present class
+  else if (hour === currentHour) {
+    $(this).addClass('present');
+  }
+  // Otherwise, add the future class
+  else {
+    $(this).addClass('future');
+  }
+});
+
+const currentDay = document.querySelector("#currentDay");
+
+const today = new Date();
+const options = { weekday: "long", month: "long", day: "numeric" };
+const formattedDate = today.toLocaleDateString("en-US", options);
+
+currentDay.textContent = formattedDate;
+
+const timeBlocks = document.querySelectorAll(".time-block");
+
+const container = document.querySelector(".container-lg");
+
+for (let i = 7; i <= 19; i++) {
+  const timeBlock = document.createElement("div");
+  timeBlock.id = `hour-${i}`;
+  timeBlock.classList.add("row", "time-block");
+
+  const hour = document.createElement("div");
+  hour.classList.add("col-2", "col-md-1", "hour", "text-center", "py-3");
+  hour.textContent = `${i}AM`;
+  timeBlock.appendChild(hour);
+
+  const description = document.createElement("textarea");
+  description.classList.add("col-8", "col-md-10", "description");
+  description.rows = 3;
+  timeBlock.appendChild(description);
+
+  const saveBtn = document.createElement("button");
+  saveBtn.classList.add("btn", "saveBtn", "col-2", "col-md-1");
+  saveBtn.setAttribute("aria-label", "save");
+  saveBtn.innerHTML = '<i class="fas fa-save" aria-hidden="true"></i>';
+  timeBlock.appendChild(saveBtn);
+
+  container.appendChild(timeBlock);
+}
+
+
+timeBlocks.forEach(timeBlock => {
+  const hour = timeBlock.id.split("-")[1];
+  if (hour < today.getHours()) {
+    timeBlock.classList.add("past");
+  } else if (hour === today.getHours()) {
+    timeBlock.classList.add("present");
+  } else {
+    timeBlock.classList.add("future");
+  }
+});
+
+timeBlocks.forEach(timeBlock => {
+  timeBlock.addEventListener("click", e => {
+    const description = timeBlock.querySelector(".description");
+    const saveBtn = timeBlock.querySelector(".saveBtn");
+    description.style.display = "block";
+    saveBtn.style.display = "block";
+  });
+});
+
+timeBlocks.forEach(timeBlock => {
+  const saveBtn = timeBlock.querySelector(".saveBtn");
+  saveBtn.addEventListener("click", e => {
+    const description = timeBlock.querySelector(".description");
+    localStorage.setItem(timeBlock.id, description.value);
+  });
+});
+
+timeBlocks.forEach(timeBlock => {
+  const description = timeBlock.querySelector(".description");
+  const savedEvent = localStorage.getItem(timeBlock.id);
+  if (savedEvent) {
+    description.value = savedEvent;
+  }
 });
