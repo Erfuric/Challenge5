@@ -10,6 +10,10 @@ Below is the text provided for the challenge.
 
 ---
 
+Current deployed page https://erfuric.github.io/Challenge5/
+
+---
+
 
 Challenge 5 boot camp
 
